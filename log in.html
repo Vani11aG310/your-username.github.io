@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="css/Home.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="../js/js.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.9.3/firebase.js"></script>
+    <script>
+        // Initialize Firebase
+        var config = {
+            apiKey: "AIzaSyAoVStHaNBFNm4wfZ1cF8c17OST4xInTRA",
+            authDomain: "portfolio1-c3fac.firebaseapp.com",
+            databaseURL: "https://portfolio1-c3fac.firebaseio.com",
+            projectId: "portfolio1-c3fac",
+            storageBucket: "portfolio1-c3fac.appspot.com",
+            messagingSenderId: "987987843181"
+        };
+        firebase.initializeApp(config);
+    </script>
+</head>
+<body>
+<div>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="Home.html">Angelo's Portfolio</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="Home.html">Home<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="AboutMe.html">About Me</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Goals.html">My Goals</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="Contact.html">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="FAQ.html">FAQ</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        My Interests/Hobbies
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <a class="dropdown-item" href="art.html">Art</a>
+                        <a class="dropdown-item" href="VideoGames.html">Video Games</a>
+                        <a class="dropdown-item" href="Movies.html">Movies</a>
+                        <a class="dropdown-item" href="Sports.html">Sports</a>
+                        <a class="dropdown-item" href="Music.html">Music</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+<div class="login-box">
+    <form method="post" action="#">
+        Email:<br><input type="email" name="email" id="email"><br>
+        Password:<br><input type="password" name="password" id="password"><br>
+        <button type="button" onclick="signIn()">Sign In</button>
+        <button type="button" onclick="adduser()">Register</button>
+        <button type="button" onclick="signOut()">Sign Out</button>
+    </form>
+</div>
+<script>
+    function adduser(){   alert("adding user!");
+        var email=document.getElementById('email').value;
+        var password =document.getElementById('password').value;
+        firebase.auth().createUserWithEmailAndPassword(email, password).catch(function(error)
+        { var errorCode = error.code;
+            var errorMessage = error.message;
+            alert("error"+ error.message);
+        });
+    }
+    function signIn(){
+        alert("Signing In");
+        var email=document.getElementById('email').value;
+        var password =document.getElementById('password').value;
+        firebase.auth().signInWithEmailAndPassword(email, password).catch(function(error) {
+            alert("Error signing in");
+            var errorCode = error.code;
+            var errorMessage = error.message;
+        });
+    }
+    function signOut(){
+        firebase.auth().signOut().then(function() {
+            alert("Signed out!");
+        }).catch(function(error) {
+        });
+    }
+    firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            alert(user.email);
+            console.log(user.toJSON());
+        } else {
+            alert("user not signed in");
+        }
+    });
+</script>
+<script>
+    //get references to th 3 html elments on the page
+    var uploader = document.getElementById("uploader");
+    var fileButton = document.getElementById("fileButton");
+    var holder = document.getElementById("holder");
+
+    //get a ref to Firebase Storage
+    var storage = firebase.storage();
+    ////////////// Will
+    function getImageForPath(p){
+        var storageRef = firebase.storage().ref();
+        var spaceRef = storageRef.child(p);
+        storageRef.child(p).getDownloadURL().then(function(url) {
+            var fullurl = url;
+            alert(fullurl);
+            holder.src = fullurl;
+        }).catch(function(error) {
+            //catch error here
+        });
+    }getImageForPath('images/khadgar.jpg');
+    /////////////
+    fileButton.addEventListener('change', function(e){
+        //get the file
+        alert("uploading file...");
+        var file = e.target.files[0];
+        //create the storage ref
+        var storageRef = firebase.storage().ref('images/'+file.name);
+        //uplaod the file
+        var task = storageRef.put(file);
+        //update the progress bar
+        task.on('state_changed',
+            function progress(snapshot) {
+                var percentage = (snapshot.bytesTransferred/snapshot.totalBytes)*100;
+                uploader.value = percentage;
+            },
+            function error(err){console.log(err);},
+            function complete(){
+                alert("upload complete");
+                getImageForPath('images/'+file.name)
+            }
+        );
+    });
+
+</script>
+</body>
+</html>
